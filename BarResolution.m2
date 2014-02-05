@@ -6,7 +6,7 @@ barResolution(PolynomialRing, Ideal):= opts -> (myRing,myIdeal) -> (
     then error "expected a polynomial ring over a field";
     barRes := new ChainComplex;
     numVars := length gens myRing;
-    
+    envAlg := 
     barRes        
 )
 end
