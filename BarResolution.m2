@@ -7,6 +7,7 @@ barResolution(PolynomialRing, Ideal):= opts -> (myRing,myIdeal) -> (
     barRes := new ChainComplex;
     numVars := length gens myRing;
     envAlg := 
+    --use vars(0..<2*(length gens myRing))
     barRes        
 )
 end
