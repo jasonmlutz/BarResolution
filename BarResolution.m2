@@ -12,6 +12,50 @@ barResolution(PolynomialRing, Ideal):= opts -> (myRing,myIdeal) -> (
     --use apply to list and substitute to switch variables
     barRes        
 )
+
+envAlgRes = method(TypicalValue => Matrix)
+envAlgRes(PolynomialRing, Ideal) := (myRing, myIdeal) -> (
+--    myField := myRing.baseRings_((length myRing.baseRings) -1); -- pull the coefficient field
+    myField := myRing.baseRings // last; --more efficient
+    if not (isField myField)
+    then error "expected a polynomial ring over a field";
+    if not (char myField == 0)
+    then error "expected a polynomial ring over a field of characteristic 0";
+    if not (isHomogeneous myIdeal)
+    then error "expected a homogeneous ideal of relations";
+    numVars := length gens myRing;
+    relsList := flatten entries gens myIdeal;
+    numRelations := length relsList;
+        --for ease, always generate ring by indexed variables x_1,..x_n
+    newYVars := {};
+    newZVars := {};
+    for count from 1 to numVars do (
+	newYVars = append(newVars, y_i)
+	newZVars = append(newVars, z_i)
+    );
+    envAlg := myField[newYVars, newZVars];
+    for i from 1 to numRelations do (
+	f_i:= sub(relsList_i,matrix{newYVars})
+	g_i:= sub(relsList_i,matrix{newZVars})
+    );
+    matrixForCycles := mutableMatrix(myEngAlg, numRelations, numGens);
+    -- M2 treats a matrix in a resolution from R^n to R^m as having
+    -- n rows and m columns
+    
+	
+    
+    
+    ) --end of envAlgRes double input polyring and ideal
+
+envAlgRes(QuotientRing) := (myQuotient) -> (
+    myRing := ambient myQuotient;
+    if not isPolynomialRing myRing
+    then error "expected a quotient of a polynomial ring";
+    myIdeal := ideal myQuotient;
+    envAlgRes(myRing, myIdeal)
+    ) -- endof envAlvRes for quotients
+    
+
 end
 --test code here
 restart
