@@ -27,25 +27,28 @@ envAlgRes(PolynomialRing, Ideal) := (myRing, myIdeal) -> (
     relsList := flatten entries gens myIdeal;
     numRelations := length relsList;
         --for ease, always generate ring by indexed variables x_1,..x_n
-    newYVars := {};
-    newZVars := {};
-    for count from 1 to numVars do (
-	newYVars = append(newVars, y_i)
-	newZVars = append(newVars, z_i)
-    );
-    envAlg := myField[newYVars, newZVars];
+    envAlg := myField[y_1..y_(numVars), z_1..z_(numVars)];
     for i from 1 to numRelations do (
 	f_i:= sub(relsList_i,matrix{newYVars})
-	g_i:= sub(relsList_i,matrix{newZVars})
+	h_i:= sub(relsList_i,matrix{newZVars})
     );
-    matrixForCycles := mutableMatrix(myEngAlg, numRelations, numGens);
+--    matrixForCycles := mutableMatrix(myEngAlg, nrows=rank target, ncols=rank source);
+    matrixForCycles := mutableMatrix(myEngAlg, numVars, numRelations);
     -- M2 treats a matrix in a resolution from R^n to R^m as having
-    -- n rows and m columns
-    
-	
-    
-    
-    ) --end of envAlgRes double input polyring and ideal
+    -- n columns and m rows
+    -- indexing of rows and columns starts at zero.
+    for j from 1 to numRelations do (
+	dividendHold = f_j-h_j;
+    for i from 1 to numVars do (
+	entryHold = (dividendHold - (dividendHold)%(y_i-z_i))/(y_i-z_i);
+	if not (isUnit denominator entryHold)
+	then error ("non-unit denominator in stage j=",toString j, "and i=", toString i);
+    	matrixForCycles_(i-1,j-1) = numerator entryHold;
+	dividendHold = dividendHold - (numerator entryHold)(y_i-z_i);
+	)
+    );
+    matrixForCycles
+    ) --end of envAlgRes with inputs polynomial ring and ideal
 
 envAlgRes(QuotientRing) := (myQuotient) -> (
     myRing := ambient myQuotient;
