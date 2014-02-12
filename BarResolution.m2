@@ -66,10 +66,19 @@ envAlgRes(PolynomialRing, Ideal) := (myRing, myIdeal) -> (
 	);
     );
     --sanity check
+    varDiff :={};
+    for i from 1 to numVars do (
+	varDiff = append(varDiff, y_i-z_i)
+    );
+    varMatrix := matrix{varDiff};
+    testMatrix := varMatrix*matrix(matrixForCycles);
     for j from 1 to numRelations do (
-	sanityCheck := sum(numVars-1, i -> matrixForCycles_(i,j-1)*(y_(i+1)-z_(i+1)));
-	if not (sanityCheck == f_j-h_j)
-	then error ("incorrect sum check of coefficients in column ",toString (j-1));
+--	sanityCheck := sum(numVars-1, i -> matrixForCycles_(i,j-1)*(y_(i+1)-z_(i+1)));
+--	if not (sanityCheck == f_j-h_j)
+--    then error ("incorrect sum check of coefficients in column ",toString (j));	
+--    print(j, sanityCheck == f_j-h_j);
+    if not (testMatrix_(0,j-1) == f_j-h_j)
+    then error ("incorrect sum check of coefficients in column ",toString (j));
 	);
     matrixForCycles
     ) --end of envAlgRes with inputs polynomial ring and ideal
