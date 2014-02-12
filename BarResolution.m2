@@ -13,20 +13,31 @@ barResolution(PolynomialRing, Ideal):= opts -> (myRing,myIdeal) -> (
     barRes        
 )
 
-envAlgRes = method(TypicalValue => MutableMatrix, Options => {Rigorous => false})
+envAlgRes = method(TypicalValue => MutableMatrix, 
+    Options => {Rigorous => false, QuotientSource => false})
 envAlgRes(PolynomialRing, Ideal) := opts-> (myRing, myIdeal) -> (
 --    myField := myRing.baseRings_((length myRing.baseRings) -1); -- pull the coefficient field
     myField := myRing.baseRings // last; --more efficient
+    numVars := length gens myRing;
+    if opts.QuotientSource
+    then print "WARNING: ensure variables are x_1..x_n for accuracy"
+    else (
+    varTest := true;
+    for i from 1 to numVars do (
+	varTest = (varTest and ((gens myRing)_(i-1)===x_i))
+    );
+    if not varTest
+    then print "WARNING: expected variables x_1..x_n";
+    );
     if opts.Rigorous
     then (
-    if not (isField myField)
-    then print "WARNING: expected a polynomial ring over a field";
-    if not (char myField == 0)
-    then print "WARNING: expected a polynomial ring over a field of characteristic 0";
-    if not (isHomogeneous myIdeal)
-    then print "WARNING: expected a homogeneous ideal of relations";
+        if not (isField myField)
+	then print "WARNING: expected a polynomial ring over a field";
+	if not (char myField == 0)
+	then print "WARNING: expected a polynomial ring over a field of characteristic 0";
+	if not (isHomogeneous myIdeal)
+	then print "WARNING: expected a homogeneous ideal of relations";
     );
-    numVars := length gens myRing;
     relsList := flatten entries gens myIdeal;
     numRelations := length relsList;
         --for ease, always generate ring by indexed variables x_1,..x_n
@@ -95,7 +106,7 @@ envAlgRes(QuotientRing) := opts -> (myQuotient) -> (
     then print "WARNING: expected a quotient of a polynomial ring";
     );
     myIdeal := ideal myQuotient;
-    envAlgRes(myRing, myIdeal)
+    envAlgRes(myRing, myIdeal, QuotientSource => true)
     ) -- endof envAlvRes for quotients
     
 
