@@ -29,7 +29,7 @@ envAlgRes(PolynomialRing, Ideal) := (myRing, myIdeal) -> (
         --for ease, always generate ring by indexed variables x_1,..x_n
     envAlg := myField[y_1..y_(numVars), z_1..z_(numVars)];
     for i from 1 to numRelations do (
-	f_i:= sub(relsList_i,matrix{newYVars})
+	f_i:= sub(relsList_i,matrix{newYVars});
 	h_i:= sub(relsList_i,matrix{newZVars})
     );
 --    matrixForCycles := mutableMatrix(myEngAlg, nrows=rank target, ncols=rank source);
@@ -44,9 +44,15 @@ envAlgRes(PolynomialRing, Ideal) := (myRing, myIdeal) -> (
 	if not (isUnit denominator entryHold)
 	then error ("non-unit denominator in stage j=",toString j, "and i=", toString i);
     	matrixForCycles_(i-1,j-1) = numerator entryHold;
-	dividendHold = dividendHold - (numerator entryHold)(y_i-z_i);
+	dividendHold = dividendHold - (numerator entryHold)*(y_i-z_i);
 	)
     );
+    --sanity check
+    for j from 1 to numRelations do (
+	sanityCheck := sum(numVars-1, i -> matrixForCycles_(i,j-1)*(y_i-z_i));
+	if not sanityCheck == f_j-h_j
+	then error ("incorrect sum check of coefficients in column "toString (j-1));
+	);
     matrixForCycles
     ) --end of envAlgRes with inputs polynomial ring and ideal
 
