@@ -13,16 +13,19 @@ barResolution(PolynomialRing, Ideal):= opts -> (myRing,myIdeal) -> (
     barRes        
 )
 
-envAlgRes = method(TypicalValue => Matrix)
-envAlgRes(PolynomialRing, Ideal) := (myRing, myIdeal) -> (
+envAlgRes = method(TypicalValue => MutableMatrix, Options => {Rigorous => false})
+envAlgRes(PolynomialRing, Ideal) := opts-> (myRing, myIdeal) -> (
 --    myField := myRing.baseRings_((length myRing.baseRings) -1); -- pull the coefficient field
     myField := myRing.baseRings // last; --more efficient
+    if opts.Rigorous
+    then (
     if not (isField myField)
-    then error "expected a polynomial ring over a field";
+    then print "WARNING: expected a polynomial ring over a field";
     if not (char myField == 0)
-    then error "expected a polynomial ring over a field of characteristic 0";
+    then print "WARNING: expected a polynomial ring over a field of characteristic 0";
     if not (isHomogeneous myIdeal)
-    then error "expected a homogeneous ideal of relations";
+    then print "WARNING: expected a homogeneous ideal of relations";
+    );
     numVars := length gens myRing;
     relsList := flatten entries gens myIdeal;
     numRelations := length relsList;
@@ -66,6 +69,7 @@ envAlgRes(PolynomialRing, Ideal) := (myRing, myIdeal) -> (
 	);
     );
     --sanity check
+--    if opts.Rigorous then (
     varDiff :={};
     for i from 1 to numVars do (
 	varDiff = append(varDiff, y_i-z_i)
@@ -78,15 +82,18 @@ envAlgRes(PolynomialRing, Ideal) := (myRing, myIdeal) -> (
 --    then error ("incorrect sum check of coefficients in column ",toString (j));	
 --    print(j, sanityCheck == f_j-h_j);
     if not (testMatrix_(0,j-1) == f_j-h_j)
-    then error ("incorrect sum check of coefficients in column ",toString (j));
+    then print ("WARNING: incorrect sum check of coefficients in column ",toString (j));
 	);
+--    );
     matrixForCycles
     ) --end of envAlgRes with inputs polynomial ring and ideal
 
-envAlgRes(QuotientRing) := (myQuotient) -> (
+envAlgRes(QuotientRing) := opts -> (myQuotient) -> (
     myRing := ambient myQuotient;
+    if opts.Rigorous then (
     if not isPolynomialRing myRing
-    then error "expected a quotient of a polynomial ring";
+    then print "WARNING: expected a quotient of a polynomial ring";
+    );
     myIdeal := ideal myQuotient;
     envAlgRes(myRing, myIdeal)
     ) -- endof envAlvRes for quotients
@@ -100,12 +107,10 @@ load "BarResolution.m2"
 R = QQ[x_1,x_2]
 I = ideal((x_1)^3,x_1*x_2)
 M = envAlgRes(R, I)
-myRing = R
-myIdeal = I
--- test with correct naming conventions
-myRing = QQ[x_1,x_2]
-myIdeal = ideal((x_1)^3,x_1*x_2)
-barResolution(myRing,myIdeal)
+S = R/I
+N = envAlgRes(S)
+assert((matrix M) == (matrix N))
+
 --motivating example
 R = QQ[x_1,x_2]
 S = QQ[y_1,y_2,z_1,z_2]
@@ -118,12 +123,3 @@ K_1 = kernel f_0
 M_1 = matrix{entries (gens K_1)_0}++matrix{entries (gens K_1)_1}
 f_1 = map(module K_1, T^(length flatten entries gens K_1), M_1)
 K_2 = kernel f_1
-
---testing another method to replace sub
-restart
-R = QQ[x_1,x_2]
-f = x_1^2+x_1*x_2
-YVars = {y_1,y_2}
-ZVars = {z_2,z_2}
-T = QQ[YVars, ZVars]
-inj1 = map (T, R, matrix{{y_1,y_2}})
