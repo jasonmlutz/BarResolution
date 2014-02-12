@@ -14,7 +14,7 @@ barResolution(PolynomialRing, Ideal):= opts -> (myRing,myIdeal) -> (
 )
 
 envAlgRes = method(TypicalValue => MutableMatrix, 
-    Options => {Rigorous => false, QuotientSource => false})
+    Options => {Rigorous => false, QuotientSource => false, NaiveStrategy=>true})
 envAlgRes(PolynomialRing, Ideal) := opts-> (myRing, myIdeal) -> (
 --    myField := myRing.baseRings_((length myRing.baseRings) -1); -- pull the coefficient field
     myField := myRing.baseRings // last; --more efficient
@@ -69,6 +69,24 @@ envAlgRes(PolynomialRing, Ideal) := opts-> (myRing, myIdeal) -> (
     -- M2 treats a matrix in a resolution from R^n to R^m as having
     -- n columns and m rows
     -- indexing of rows and columns starts at zero.
+    varDiff :={};
+    for i from 1 to numVars do (
+	varDiff = append(varDiff, y_i-z_i)
+    );
+--start of syzygy strategy
+    if opts.NaiveStrategy == false then (
+    matrixForCycles = mutableMatrix(myEnvAlg, numVars, numRelations);
+    for j from 1 to numRelations do (
+	tempVarDiff = append(varDiff, f_j-h_j);
+	syzSource = matrix{{tempVarDiff}};
+	tempKernel = kernel syzSource;
+	
+	
+	--include fail check to force naive strategy
+    ) --end of syzygy strategy    
+--start of naive strategy    
+    if (SyzygyStrategyFail or opts.NaiveStrategy) then (
+    matrixForCycles = mutableMatrix(myEnvAlg, numVars, numRelations); --clears entries
     for j from 1 to numRelations do (
 	dividendHold = f_j-h_j;
     for i from 1 to numVars do (
@@ -81,12 +99,9 @@ envAlgRes(PolynomialRing, Ideal) := opts-> (myRing, myIdeal) -> (
 	dividendHold = dividendHold - (numerator entryHold)*(y_i-z_i);
 	);
     );
+    );
     --sanity check
 --    if opts.Rigorous then (
-    varDiff :={};
-    for i from 1 to numVars do (
-	varDiff = append(varDiff, y_i-z_i)
-    );
     varMatrix := matrix{varDiff};
     testMatrix := varMatrix*matrix(matrixForCycles);
     for j from 1 to numRelations do (
