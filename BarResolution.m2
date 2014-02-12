@@ -75,7 +75,9 @@ envAlgRes(PolynomialRing, Ideal) := opts-> (myRing, myIdeal) -> (
 	entryHold = (dividendHold - (dividendHold)%(y_i-z_i))/(y_i-z_i);
 	if not (isUnit denominator entryHold)
 	then error ("non-unit denominator in stage j=",toString j, "and i=", toString i);
-    	matrixForCycles_(i-1,j-1) = numerator entryHold;
+	print(denominator entryHold);
+--    	matrixForCycles_(i-1,j-1) = (numerator entryHold)*(1/(denominator entryHold));
+    	matrixForCycles_(i-1,j-1) = (numerator entryHold);
 	dividendHold = dividendHold - (numerator entryHold)*(y_i-z_i);
 	);
     );
@@ -99,6 +101,11 @@ envAlgRes(PolynomialRing, Ideal) := opts-> (myRing, myIdeal) -> (
     matrixForCycles
     ) --end of envAlgRes with inputs polynomial ring and ideal
 
+----
+-- New technique to implement: manually build a matrix {{y_1-z_1,..,y_n-z_n,f_j}} and 
+-- find a column in the presentation of the kernel which has 1 in the last enter.
+----
+
 envAlgRes(QuotientRing) := opts -> (myQuotient) -> (
     myRing := ambient myQuotient;
     if opts.Rigorous then (
@@ -115,12 +122,27 @@ end
 restart
 load "BarResolution.m2"
 --test for envAlgRes
-R = QQ[x_1,x_2]
+R = QQ[x_1,x_2, y_1,y_2]
 I = ideal((x_1)^3,x_1*x_2)
 M = envAlgRes(R, I)
 S = R/I
 N = envAlgRes(S)
-assert((matrix M) == (matrix N))
+--assert((matrix M) == (matrix N)) --doesn't work, targets aren't ===
+
+R = QQ[x_1,x_2,x_3]
+I = ideal((x_1)^3+(x_3)^3, x_1*x_2-x_2^2, x_2^4-x_1*x_2*x_3^2+3*x_2^3*x_3)
+M = envAlgRes(R,I, Rigorous => true)
+--class of random examples, doesn't work
+n = 2 --numVars
+c = 3 --numRelations
+R = QQ[x_1..x_n]
+--T = ZZ[x_1..x_n]
+--f = map(R, T, matrix{gens R})
+gensList = ()
+for i from 1 to c do (
+      gensList = append(gensList, random(2+(-1)^i,R)))
+I = ideal(gensList)
+M = envAlgRes(R, I, Rigorous => true)  
 
 --motivating example
 R = QQ[x_1,x_2]
