@@ -129,9 +129,8 @@ envAlgRes(QuotientRing) := opts -> (myQuotient) -> (
     );
     myIdeal := ideal myQuotient;
     envAlgRes(myRing, myIdeal, QuotientSource => true)
-    ) -- endof envAlvRes for quotients
+    ) -- endof envAlvRes for quotients    
     
-
 end
 --test code here
 restart
