@@ -1,0 +1,16 @@
+cleverFactor = method()
+cleverFactor := (f) -> (
+    myRing := ring f;
+    if not isHomogeneous f
+    then error "expected a polynomial ring over a field";
+    myField := myRing.baseRings // last; --more efficient
+    if not (isField myField)
+    then error "expected a polynomial ring over a field";
+    if (char R) =!= 0
+    then error "expected a characteristic 0 base field";
+    )
+
+
+end
+restart
+load "cleverFactor.m2"

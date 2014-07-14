@@ -54,6 +54,7 @@ envAlgRes(PolynomialRing, Ideal) := opts-> (myRing, myIdeal) -> (
     ZGens := {};
     for i from 1 to numVars do (
 	YGens=append(YGens, (gens myEnvAlg)_(i-1));
+      
 	ZGens=append(ZGens, (gens myEnvAlg)_((numVars)+i-1));
     );	    
     injY := map(myEnvAlg, myRing, matrix{YGens});
