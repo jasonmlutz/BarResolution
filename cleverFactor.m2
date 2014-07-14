@@ -25,10 +25,6 @@ cleverFactor := (f) -> (
     fx := injX(f);
     fy := injY(f);
     deg := degree f;
-    for h from 1 to numGens do (
-    
-    
-    )
 
     
 )
