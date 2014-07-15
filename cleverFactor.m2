@@ -50,6 +50,22 @@ specialPartial = (myPolynomial,varsSequence) -> (
     diffed
 )--works!
 
+--build a sequence consisting of the highest power
+--of each variable appearing; for use in optimizing the
+--number of sequences added to the bag of multisets
+buildDegreeSequence = (myPolynomial) -> (
+    degreeSequence = ();
+    myRing = ring myPolynomial;
+    for i from 1 to #gens(myRing) do (
+        degreeSequence = append(degreeSequence,degree((gens R)_(i-1),myPolynomial));
+    );
+    degreeSequence
+)--works        
+
+multisetSequence = (polyDegree, degreeBounds) -> (
+    bag = {}; --storage for sequences
+)
+
 cleverFactor = method()
 cleverFactor := (f) -> (
     myRing := ring f;
@@ -82,7 +98,9 @@ cleverFactor := (f) -> (
     deg := degree f;
 --the placeholder for the coefficients of each (x_j-y_j)    
     coefficientMatrix = mutableMatrix(myNewRing, 1, numVars);
-
+--columnCount tracks the index of x_j-y_j    
+    for columnCount from 1 to numVars do (
+        
 {* --this original algorithm won't work; need to account for possible
    --repotition of the variables of differentiation. Consider
    --use of sequences rather than sets of variables.
@@ -102,7 +120,9 @@ cleverFactor := (f) -> (
     	    	coefficientMatrix_(0,columnCount) = (1/d^(# varsSubset))*varFactor*specialPartial(fy,yVarsSubset);
 		);
 	);
-    ); *}
+    ); *} --end of original
+
+    );
 coefficientMatrix
 
 )
