@@ -60,10 +60,41 @@ buildDegreeSequence = (myPolynomial) -> (
         degreeSequence = append(degreeSequence,degree((gens R)_(i-1),myPolynomial));
     );
     degreeSequence
-)--works        
+)--works!        
 
-multisetSequence = (polyDegree, degreeBounds) -> (
-    bag = {}; --storage for sequences
+--build a collection of sequences composed of integers
+--1..degree(myPoly)-1, under the condition that an integer
+--j must appear no more than degree(y_j,f) times,
+--with the exception that the distinguished index i has a bound
+--1 less.
+--
+--This is being abandoned; there is no real need to be able to construct
+--such a sequence outside of the cleverFactor method as it will be
+--a huge use of memory. Instead, integrate the style of loops into
+--clever factor and the long list of sequences will not need to be stored.
+multisetSequence = (polyDegree, degreeBounds, distinguishedIndex) -> (
+--storage for sequences, ordering allows for duplicates
+    bag = ();
+--storage for information about repititions in each element of the bag
+    bagCount = ();    
+--add the empty sequence as an element in bag, bagCount
+    bag = append(bag,());    
+    bagCount = append(bagCount,0);        
+--build the starting structure of one sequence for each allowable value
+--of the distinguished index
+    for i from 1 to degreeBounds_(distinguishedIndex-1) do (
+	nextBagMember = ();
+--structure for counting how many copies will be added	
+	nextBagCountMember = ();
+	copyCount = 0;
+--fill this bag with the right number of copies of the distinguished index	    
+	for j from 1 to i do (
+	    nextBagMember = append(nextBagMember,distinguishedIndex);
+	    );
+	bag = append(bag, nextBagMember);
+--	print bag; --for debugging
+	);
+    bag
 )
 
 cleverFactor = method()
