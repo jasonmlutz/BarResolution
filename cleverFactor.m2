@@ -32,12 +32,16 @@ getSublistOfList = (myList, entryList) -> (
 
 --Returns the power set of a given list, leaving out the emptyset.  
 --E.g. {2,3,4} becomes { (2),(3),(4),(2,3),(2,4),(3,4),(2,3,4) }
+--as applied to cleverFactor, nontrivialPowerSet will help index all possible
+--candidates for the set A over which the sum is indexed.
 nontrivialPowerSet = (myList) ->(
      apply(2^(#myList)-1, i-> getSublistOfList(myList, getNonzeroBinaryDigits(i+1,0) ) )
 )
 
---as applied to cleverFactor, nontrivialPowerSet will help index all possible
---candidates for the set A over which the sum is indexed.
+specialPartial = (myPolynomial,varsList) -> (
+       
+)
+
 cleverFactor = method()
 cleverFactor := (f) -> (
     myRing := ring f;
@@ -65,16 +69,25 @@ cleverFactor := (f) -> (
     fx := injX(f);
     fy := injY(f);
     deg := degree f;
-    coefficientMatrix = mutableMatrix(myNewRing, numVars, 1);
+    coefficientMatrix = mutableMatrix(myNewRing, 1, numVars);
     for columnCount from 1 to numVars do (
 	--columnCount tracks the variable pair x_j-y_j
-	indexedVars = 1..numVars; --a sequence
-    	indexedVars = toList indexedVars; --now a list
-    	varSubset = nontrivialPowerSet(indexedVars);
+	varsIndices = 1..numVars; --a sequence
+    	varsIndices = toList indexedVars; --now a list
+    	indicesSubset = nontrivialPowerSet(varsIndices);
+	for subsetCounter from 1 to 2^(numVars-1) do (
+	    varsSubset = indicesSubset_subsetCounter;
+	    if isSubset(set{columnCount},varsSubset) then
+	    for j in varsSubset do (
+		varFactor = 1;
+		for a in varsSubset do (
+		    if a=!=columnCount then varFactor = varFactor*XGens_(a-1)
+		);
+    	    	coefficientMatrix_(0,columnCount) = (1/d^(# varsSubset))*varFactor*specialPartial(fy,yVarsSubset);
+		);
 	);
-    
-
---begin building the structure for the sum decomposition
+    );
+coefficientMatrix
 
 )
 
