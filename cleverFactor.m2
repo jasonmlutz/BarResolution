@@ -38,9 +38,17 @@ nontrivialPowerSet = (myList) ->(
      apply(2^(#myList)-1, i-> getSublistOfList(myList, getNonzeroBinaryDigits(i+1,0) ) )
 )
 
-specialPartial = (myPolynomial,varsList) -> (
-       
-)
+--performs partial derivatives of the given polynomial by
+--the variables in the given sequence
+specialPartial = (myPolynomial,varsSequence) -> (
+    myRing = ring myPolynomial;
+    if not isSubset(toList(varsSequence),gens myRing) 
+    then error "expected argument 2 to be a sequence of generators of the ring";
+    diffed = myPolynomial;
+    for i from 1 to #varsSequence do (    
+	diffed = diff(varsSequence_(i-1),diffed) );
+    diffed
+)--works!
 
 cleverFactor = method()
 cleverFactor := (f) -> (
@@ -52,29 +60,37 @@ cleverFactor := (f) -> (
     then error "expected a polynomial ring over a field";
     if (char R) =!= 0
     then error "expected a characteristic 0 base field";
+--creating the new variables for the ring representing the enveloping algebra    
     numVars := length gens myRing;
     newGens = gens myRing;
     for i from 1 to numVars do (
     	newGens = append(newGens, y_i);
-    );
+    ); 
     myNewRing := newRing(myRing, Variables=>newGens);
+--collecting the x and y portions of the new varialbes, as elements of the new ring    
     XGens = {};
     YGens = {};
     for i from 1 to numVars do (
 	XGens=append(XGens, (gens myNewRing)_(i-1));
 	YGens=append(YGens, (gens myNewRing)_((numVars)+i-1));
     );	    
+--constructing the copies of f(x) and f(y) in the new ring
     injX := map(myNewRing, myRing, matrix{XGens});
     injY := map(myNewRing, myRing, matrix{YGens});
     fx := injX(f);
     fy := injY(f);
     deg := degree f;
+--the placeholder for the coefficients of each (x_j-y_j)    
     coefficientMatrix = mutableMatrix(myNewRing, 1, numVars);
+
+{* --this original algorithm won't work; need to account for possible
+   --repotition of the variables of differentiation. Consider
+   --use of sequences rather than sets of variables.
+--columnCount tracks the index of x_j-y_j    
     for columnCount from 1 to numVars do (
-	--columnCount tracks the variable pair x_j-y_j
 	varsIndices = 1..numVars; --a sequence
     	varsIndices = toList indexedVars; --now a list
-    	indicesSubset = nontrivialPowerSet(varsIndices);
+    	indicesSubset = nontrivialPowerSet(varsIndices); 
 	for subsetCounter from 1 to 2^(numVars-1) do (
 	    varsSubset = indicesSubset_subsetCounter;
 	    if isSubset(set{columnCount},varsSubset) then
@@ -86,7 +102,7 @@ cleverFactor := (f) -> (
     	    	coefficientMatrix_(0,columnCount) = (1/d^(# varsSubset))*varFactor*specialPartial(fy,yVarsSubset);
 		);
 	);
-    );
+    ); *}
 coefficientMatrix
 
 )
