@@ -97,6 +97,26 @@ multisetSequence = (polyDegree, degreeBounds, distinguishedIndex) -> (
     bag
 )
 
+factorial = i -> (
+    i!
+)    
+
+sumSequence = (mySequence) -> (
+    sum(toList(mySequence))
+)
+
+multinomial = (mySeqnence) -> (
+     (factorial(sumSequence(mySeqnence)))/(sumSequence(mySeqnence / factorial))
+)
+
+varsPowers = (mySequence,myVars) -> (
+    holder = 1;
+    for i from 0 to (#mySequence -1) do (
+	holder = holder*(myVars__i)^(mySequence_i);
+    );
+    holder	
+)            
+
 cleverFactor = method()
 cleverFactor := (f) -> (
     myRing := ring f;
@@ -129,8 +149,39 @@ cleverFactor := (f) -> (
     deg := degree f;
 --the placeholder for the coefficients of each (x_j-y_j)    
     coefficientMatrix = mutableMatrix(myNewRing, 1, numVars);
+    degreeSequence = buildDegreeSequence(f);
+--create and populate an sequence to track the exponents	
+    sequenceOfPowers = ();
+    for i from 1 to numVars do (
+	sequenceOfPowers = append(sequenceOfPowers, 0);
+    );
+    indexCounter = 0;
+--a large loop; columnCount tracking will occur within 
+--the selection of each sequenceOfPowers, as there is
+--a great deal of repitition.
+    finishd = false;
+    while finished == false do (
+	prepped = false;
+	while prepped == false do (
+	    if (sequenceOfPowers_indexCounter < degreeSequence_indexCounter) then
+	    sequenceOfPowers_indexCounter = sequenceOfPowers_indexCounter+1
+	    else sequenceOfPowers_indexCounter = 0
+	    
+
+
 --columnCount tracks the index of x_j-y_j    
     for columnCount from 1 to numVars do (
+	if degreeSequence_(columnCount-1) > sequenceOfPowers_(columnCount-1) 
+	then coefficientMatrix_(0,columnCount-1) = 
+	coefficientMatrix_(0,columnCount-1)
+	+ (1/deg^(sumSequence(sequenceOfPowers)+1))
+	* multinomial(sequenceOfPowers)
+	* varsPowers(sequenceOfPowers,YGens)
+	* specialPartial(f,sequenceOfPowers) ;
+	);
+    );
+coefficientMatrix
+)
         
 {* --this original algorithm won't work; need to account for possible
    --repotition of the variables of differentiation. Consider
@@ -152,11 +203,6 @@ cleverFactor := (f) -> (
 		);
 	);
     ); *} --end of original
-
-    );
-coefficientMatrix
-
-)
 
 
 
