@@ -68,8 +68,14 @@ sumSequence = (mySequence) -> (
     sum(myList)
 ) *}
 
-multinomial = (mySeqnence) -> (
-     (factorial(sum(toList mySeqnence)))/(sum(toList mySeqnence / factorial))
+multinomial = (mySequence) -> (
+    myList = (toList mySequence);
+    upperPrep = sum myList;
+    upper = factorial upperPrep;
+    lowerPrep = myList / factorial;
+    lower = sum(lowerPrep);
+    upper / lower
+--     (factorial(sum(toList mySequence)))/(sum(toList (mySequence / factorial)))
 )
 
 varsPowers = (mySequence,myVars) -> (
@@ -79,6 +85,9 @@ varsPowers = (mySequence,myVars) -> (
     );
     holder	
 )            
+
+--for debugging which loop is broken
+--end
 
 cleverFactor = method(TypicalValue => MutableMatrix)
 cleverFactor(RingElement) := (f) -> (
@@ -131,6 +140,10 @@ cleverFactor(RingElement) := (f) -> (
 --a large loop; columnCount tracking will occur within 
 --the selection of each sequenceOfPowers, as there is
 --a great deal of repitition.
+
+--debug zone
+--ans = read "debug 1? y or n "; if ans == "y" then print sequenceOfPowers;
+
     finished = false;
     while finished == false do (
 --(re)set the need for overflow	    
@@ -139,7 +152,11 @@ cleverFactor(RingElement) := (f) -> (
 --the deg-1 is since we're secretly going to add one factor
 --of y_j as j varies, then ignore it for parts of the computation,
 --so there needs to be room to make this later addition
-	if (sum(toList sequenceOfPowers) >=  (deg-1)) 
+
+--debug zone
+--ans = read "debug 2? y or n "; if ans == "y" then print (sequenceOfPowers,activateOverflow,finished,(sum(toList sequenceOfPowers) >=  (deg-1)));
+
+	if (sum(toList sequenceOfPowers) >=  (deg-1))
 --queue the overflow; staring with the 2nd entry	    
 	then (
 	    activateOverflow = true; 
@@ -153,7 +170,12 @@ cleverFactor(RingElement) := (f) -> (
 	    activateOverflow = true;
 	    overflowColumn = 1;
 	)
-	);	
+	);
+    
+--debug zone
+ans = read "debug 3? y or n "; if ans == "y" then print (sequenceOfPowers,activateOverflow,finished);
+
+    	
 --check if there is space to perform the addition in the "ones" place
 	if activateOverflow = false
 --there is space. perform the addition. prepped for coefficientMatrix
@@ -163,8 +185,12 @@ cleverFactor(RingElement) := (f) -> (
 --begin search for the next column that has space for addition,
 --and that there is a column left to consider		
 	overflowLocated = false;
+--debug zone	
+ans = read "debug 4? y or n "; if ans == "y" then print (sequenceOfPowers,overflowColumn, overflowLocated, overflowColumn <= (deg-1));	
 	while ((overflowLocated == false) and (overflowColumn <= (deg-1))) do (
 --check if the current column allows for addition		
+--debug zone
+ans = read "debug 5? y or n "; if ans4 == "y" then print (sequenceOfPowers,overflowColumn);
 	    if (sequenceOfPowers_overflowColumn < degreeSequence_overflowColumn)
 	    then (overflowLocated = true)
 --if not, move to the next.		
@@ -181,13 +207,13 @@ cleverFactor(RingElement) := (f) -> (
 	    sequenceOfPowers_i = 0
 	    );
 	)
---there isn't enough space to overflow, so we're done.	
-	else (finished = true )
+--there isn't enough space to overflow, so this is the last run.	
+	else (finished = true );
+--debug zone
+ans = read "debug 6? y or n "; if ans == "y" then print (sequenceOfPowers,overflowColumn,finished);	
 	);
---otherwise, we've made some reasonable adjustment to the sequenceOfPowers,
+--we have a reasonable sequenceOfPowers (and it may be the last if finished == true)
 --so perform the changes to coefficientMatrix    
-        if finished = false 
-        then (
 --columnCount tracks the index of x_j-y_j    
         for columnCount from 1 to numVars do (
 --for each j, the general algorithm sums over these multisets that contain j.
@@ -203,7 +229,6 @@ cleverFactor(RingElement) := (f) -> (
 	    * varsPowers(sequenceOfPowers,YGens)
 	    * specialPartial(f,sequenceOfPowers);
 	);
-        );
     );
 coefficientMatrix
 )
@@ -235,6 +260,13 @@ coefficientMatrix
 end
 restart
 load "cleverFactor.m2"
+R = QQ[x_1,x_2,x_3]
+f = x_1+x_2+x_3
+M = cleverFactor(f)
+y
+y
+y
+
 R = QQ[x]
 cleverFactor(x)
 c
