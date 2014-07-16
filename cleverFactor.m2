@@ -61,12 +61,15 @@ factorial = i -> (
     i!
 )    
 
+--this is broken. I don't know why.
+{*
 sumSequence = (mySequence) -> (
-    sum(toList(mySequence))
-)
+    myList = (toList mySequence);
+    sum(myList)
+) *}
 
 multinomial = (mySeqnence) -> (
-     (factorial(sumSequence(mySeqnence)))/(sumSequence(mySeqnence / factorial))
+     (factorial(sum(toList mySeqnence)))/(sum(toList mySeqnence / factorial))
 )
 
 varsPowers = (mySequence,myVars) -> (
@@ -77,8 +80,8 @@ varsPowers = (mySequence,myVars) -> (
     holder	
 )            
 
-cleverFactor = method()
-cleverFactor := (f) -> (
+cleverFactor = method(TypicalValue => MutableMatrix)
+cleverFactor(RingElement) := (f) -> (
 --name relevant objects    
     myRing := ring f;
 --create output for predictable errors of input    
@@ -108,7 +111,7 @@ cleverFactor := (f) -> (
     injY := map(myNewRing, myRing, matrix{YGens});
     fx := injX(f);
     fy := injY(f);
-    deg := degree f;
+    deg := first (degree f);
 --the placeholder for the coefficients of each (x_j-y_j)    
     coefficientMatrix = mutableMatrix(myNewRing, 1, numVars);
 --the sequence consisting of the (highest) degrees of each variable
@@ -136,7 +139,7 @@ cleverFactor := (f) -> (
 --the deg-1 is since we're secretly going to add one factor
 --of y_j as j varies, then ignore it for parts of the computation,
 --so there needs to be room to make this later addition
-	if (sumSequence(sequenceOfPowers) >=  (deg-1)) 
+	if (sum(toList sequenceOfPowers) >=  (deg-1)) 
 --queue the overflow; staring with the 2nd entry	    
 	then (
 	    activateOverflow = true; 
@@ -195,7 +198,7 @@ cleverFactor := (f) -> (
 	    if (degreeSequence_(columnCount-1) > sequenceOfPowers_(columnCount-1))
 	    then coefficientMatrix_(0,columnCount-1) = 
 	    coefficientMatrix_(0,columnCount-1)
-	    + (1/deg^(sumSequence(sequenceOfPowers)+1))
+	    + (1/deg^(sum(toList sequenceOfPowers)+1))
 	    * multinomial(sequenceOfPowers)
 	    * varsPowers(sequenceOfPowers,YGens)
 	    * specialPartial(f,sequenceOfPowers);
@@ -232,5 +235,8 @@ coefficientMatrix
 end
 restart
 load "cleverFactor.m2"
+R = QQ[x]
+cleverFactor(x)
+c
 R = QQ[x_1,x_2]
 f = x_1^2+x_1*x_2
