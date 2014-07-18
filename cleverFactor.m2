@@ -1,6 +1,6 @@
---performs partial derivatives of the given polynomial by
+g--performs partial derivatives of the given polynomial by
 --the variables in the given list
-specialPartial = (myPolynomial,powersList, variablesList) -> (
+specialPartial = (myPolynomial,powersList, variablesList,bonus) -> (
     if not (#powersList == #variablesList) then error "expected two lists of same size";
     myRing = ring myPolynomial;
     if not (isSubset(variablesList, gens myRing)) then error "expected argument 3 to be a subset of the generators of the ring";
@@ -17,7 +17,7 @@ specialPartial = (myPolynomial,powersList, variablesList) -> (
 	diffed = diff(variablesList_i,diffed)
 	);
     );
-    diffed
+    diff(variablesList_(bonus-1),diffed)
 )--works!
 
 --build a list consisting of the highest power
@@ -49,7 +49,7 @@ multinomial = (myList) -> (
     lowerPrep = myList / factorial;
     lower = sum(lowerPrep);
     upper / lower *}
-     (factorial(sum myList))/(sum(myList / factorial))
+     (factorial(sum myList))/(product(myList / factorial))
 )
 
 varsPowers = (myList,myVars) -> (
@@ -120,6 +120,37 @@ cleverFactor(RingElement) := (f) -> (
 
     finished = false;
     while finished == false do (
+--we have a reasonable listOfPowers 
+--so perform the changes to coefficientMatrix    
+--columnCount tracks the index of x_j-y_j    
+        for columnCount from 1 to numVars do (
+--for each j, the general algorithm sums over these multisets that contain j.
+--to make the above construction apply independently of j, the multisets above
+--were allowed to have, at most, deg-1 terms, so that one more y_j can now be added.
+--we now check against the degreeList to see if this addition can occur.
+--if not, then this multiset is not included in the sum for that value of j.
+
+--degug zone
+--ans = read "pre-coefficientMatrix adjust debug? y or n: "; if ans == "y" then print (columnCount, degreeList,listOfPowers);
+	    if (degreeList_(columnCount-1) > listOfPowers_(columnCount-1))
+--debug zone
+	    then
+--	    ans = read "coefficientMatrix verbose debug? y or n: "; 
+--    if ans == "y" then 
+             print(columnCount,
+		 listOfPowers,
+		 coefficientMatrix_(0,columnCount-1),
+	     (1/(deg^(sum listOfPowers+1))),
+	     multinomial(listOfPowers),
+	     varsPowers(listOfPowers,YGens),
+	     specialPartial(fy,listOfPowers,YGens,columnCount));
+    coefficientMatrix_(0,columnCount-1) = 
+	    coefficientMatrix_(0,columnCount-1)
+	    + (1/(deg^(sum listOfPowers+1)))
+	    * multinomial(listOfPowers)
+	    * varsPowers(listOfPowers,YGens)
+	    * specialPartial(fy,listOfPowers,YGens,columnCount);
+		
 --(re)set the need for overflow	    
 	activateOverflow = false;
 --check if current total degree forces overflow
@@ -161,7 +192,7 @@ cleverFactor(RingElement) := (f) -> (
 	overflowLocated = false;
 --debug zone	
 --ans = read "debug 4? y or n "; if ans == "y" then print (listOfPowers,overflowColumn, overflowLocated, overflowColumn <= (deg-1));	
-	while ((overflowLocated == false) and (overflowColumn <= (deg-1))) do (
+	while ((overflowLocated == false) and (overflowColumn <= (deg))) do (
 --check if the current column allows for addition		
 --debug zone
 --ans = read "debug 5? y or n "; if ans4 == "y" then print (listOfPowers,overflowColumn);
@@ -172,7 +203,7 @@ cleverFactor(RingElement) := (f) -> (
 	);
 --asses the reason that the preceeding search for the overflowColumn was terminated,
 --i.e., have we reached the end?	
-	if (overflowColumn <= (deg-1))
+	if (overflowColumn <= (deg))
 	then (
 --increase by 1 in the overflow column	    
 	listOfPowers_overflowColumn = listOfPowers_overflowColumn + 1;
@@ -181,28 +212,12 @@ cleverFactor(RingElement) := (f) -> (
 	    listOfPowers_i = 0
 	    );
 	)
---there isn't enough space to overflow, so this is the last run.	
+--there isn't enough space to overflow, so we're done.	
 	else (finished = true );
 --debug zone
 --ans = read "debug 6? y or n "; if ans == "y" then print (listOfPowers,overflowColumn,finished);	
 	);
---we have a reasonable listOfPowers (and it may be the last if finished == true)
---so perform the changes to coefficientMatrix    
---columnCount tracks the index of x_j-y_j    
-        for columnCount from 1 to numVars do (
---for each j, the general algorithm sums over these multisets that contain j.
---to make the above construction apply independently of j, the multisets above
---were allowed to have, at most, deg-1 terms, so that one more y_j can now be added.
---we now check against the degreeList to see if this addition can occur.
---if not, then this multiset is not included in the sum for that value of j.
-	    if (degreeList_(columnCount-1) > listOfPowers_(columnCount-1))
-	    then coefficientMatrix_(0,columnCount-1) = 
-	    coefficientMatrix_(0,columnCount-1)
-	    + (1/deg^(sum listOfPowers)+1)
-	    * multinomial(listOfPowers)
-	    * varsPowers(listOfPowers,YGens)
-	    * specialPartial(fy,listOfPowers,YGens);
-	);
+   );
     );
 matrix coefficientMatrix
 )
@@ -240,9 +255,20 @@ M = cleverFactor(f)
 A = matrix{{x_1-y_1},{x_2-y_2},{x_3-y_3}}
 first(flatten(entries (M*A)))
 
+restart
+load "cleverFactor.m2"
+R = QQ[x_1,x_2,x_3]
+f = x_3^2
+M = cleverFactor(f)
+A = matrix{{x_1-y_1},{x_2-y_2},{x_3-y_3}}
+first(flatten(entries (M*A)))
 
+restart
+load "cleverFactor.m2"
 R = QQ[x]
 M = cleverFactor(x)
-c
+y
+y
+
 R = QQ[x_1,x_2]
 f = x_1^2+x_1*x_2
