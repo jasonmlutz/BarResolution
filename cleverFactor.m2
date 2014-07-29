@@ -1,4 +1,4 @@
-g--performs partial derivatives of the given polynomial by
+--performs partial derivatives of the given polynomial by
 --the variables in the given list
 specialPartial = (myPolynomial,powersList, variablesList,bonus) -> (
     if not (#powersList == #variablesList) then error "expected two lists of same size";
@@ -206,10 +206,20 @@ cleverFactor(RingElement) := (f) -> (
 	if (overflowColumn <= (deg))
 	then (
 --increase by 1 in the overflow column	    
-	listOfPowers_overflowColumn = listOfPowers_overflowColumn + 1;
+    	tempList = {};
+	for i from 0 to ((#listOfPowers)-1) do (
+	    if i == overflowColumn then (
+		tempList = append(tempList, (listOfPowers_overflowColumn)+1))
+	    else tempList = append(tempList, listOfPowers_overflowColumn)
+	    );
+	listOfPowers = tempList;
 --reset all lower columns to 0	    
+    	tempList = {};
 	for i from 0 to (overflowColumn - 1) do (
-	    listOfPowers_i = 0
+    	    tempList = append(tempList,0)
+	    );
+	for i from overflowColumn to ((#listOfPowers) - 1) do (
+	    tempList = append(tempList, listOfPowers_i)
 	    );
 	)
 --there isn't enough space to overflow, so we're done.	
