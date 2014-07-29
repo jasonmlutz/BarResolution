@@ -99,17 +99,10 @@ cleverFactor(RingElement) := (f) -> (
     deg := first (degree f);
 --the placeholder for the coefficients of each (x_j-y_j)    
     coefficientMatrix = mutableMatrix(myNewRing, 1, numVars);
---create and populate a list to track the exponents	&
---create and populate a list to track whether overflow
---can occur during the counting procedure; constructed to be
---0 in the case that a variable does not appear in the input
---polynomial f
+--create and populate a list to track the exponents
     listOfPowers = {};
---not needed; check listOfPowers directly	    
---    overflowTracker = ();
     for i from 1 to numVars do (
 	listOfPowers = append(listOfPowers, 0);
---	overflowTracker = append(overflowTracker,min(1,degreeList_(i-1))); 
     );
 --a large loop; columnCount tracking will occur within 
 --the selection of each listOfPowers, as there is
@@ -144,7 +137,7 @@ cleverFactor(RingElement) := (f) -> (
 	     multinomial(listOfPowers),
 	     varsPowers(listOfPowers,YGens),
 	     specialPartial(fy,listOfPowers,YGens,columnCount));
-    coefficientMatrix_(0,columnCount-1) = 
+    	    coefficientMatrix_(0,columnCount-1) = 
 	    coefficientMatrix_(0,columnCount-1)
 	    + (1/(deg^(sum listOfPowers+1)))
 	    * multinomial(listOfPowers)
@@ -179,8 +172,7 @@ cleverFactor(RingElement) := (f) -> (
     
 --debug zone
 --ans = read "debug 3? y or n "; if ans == "y" then print (listOfPowers,activateOverflow,finished);
-
-    	
+ 	
 --check if there is space to perform the addition in the "ones" place
 	if activateOverflow = false
 --there is space. perform the addition. prepped for coefficientMatrix
