@@ -1,16 +1,63 @@
+--the method for building the lists of powers outside of the cleverFactor method
+listBuilder = method()
+listBuilder(List,ZZ) := (degreeList,deg) -> (
+    finished = false;
+    listOfPowers = {};
+    for i from 0 to (#degreeList-1) do (
+	listOfPowers = append(listOfPowers, 0)
+	);
+    	listOfLists = {};
+    while finished == false do (
+	if (sum(listOfPowers) < deg)
+	then (
+	    listOfLists = append(listOfLists,listOfPowers)
+	    );
+	overflowColumn = 0;
+	activateOverflow = false;
+	if (listOfPowers_0 >= (degreeList_0)) 
+	then (
+	    activateOverflow = true;
+	);
+	if activateOverflow == false 
+	then (
+	    tempList = {(listOfPowers_0)+1};
+	    for i from 1 to (#listOfPowers-1) do (
+		tempList = append(tempList, listOfPowers_i)
+		);
+	    listOfPowers = tempList;
+	    )
+	else (
+	    overflowLocated = false;
+	    while overflowLocated == false do (
+		overflowColumn = overflowColumn +1;
+		if (overflowColumn >= #listOfPowers) then (overflowLocated = true; finished = true;)
+		else(
+		    if (listOfPowers_overflowColumn < degreeList_overflowColumn) then (
+		    overflowLocated = true)
+		);
+	    );
+	    if (overflowColumn < #listOfPowers) then (
+		tempList = {};
+		for i from 0 to (overflowColumn-1) do (
+		    tempList = append(tempList,0)
+		    );
+		tempList = append(tempList, (listOfPowers_overflowColumn)+1);
+		for i from (overflowColumn+1) to (#listOfPowers-1) do (
+		    tempList = append(tempList, listOfPowers_i)
+		);
+	    	listOfPowers = tempList;
+	    );
+	);
+    );
+listOfLists
+)
+
 --performs partial derivatives of the given polynomial by
 --the variables in the given list
 specialPartial = (myPolynomial,powersList, variablesList,bonus) -> (
     if not (#powersList == #variablesList) then error "expected two lists of same size";
     myRing = ring myPolynomial;
     if not (isSubset(variablesList, gens myRing)) then error "expected argument 3 to be a subset of the generators of the ring";
-{*    myRing = ring myPolynomial;
-    numVars := length gens myRing;
-    myVars = {};
-    for k from ((numVars)/2) to (numVars-1) do (
-	myVars = append(myVars, (gens myRing)_k);
-	);    
-    *}
     diffed = myPolynomial;
     for i from 0 to (#powersList-1) do (    
 	for j from 1 to (powersList_i) do (
@@ -35,23 +82,25 @@ factorial = i -> (
     i!
 )    
 
---this is broken. I don't know why.
-{*
-sumSequence = (mySequence) -> (
-    myList = (toList mySequence);
-    sum(myList)
-) *}
+--compute the multinomial coefficient, modified for bonus
+{*multinomial = (myList,bonus) -> (
+    tempList = {};
+    for i from 0 to (bonus-2) do (
+	tempList = append(tempList,myList_i)
+	);
+    tempList = append(tempList, (myList_(bonus-1)+1));
+    for i from (bonus) to (#myList-1) do (
+	tempList = append(tempList, myList_i)
+    );    
+     (factorial(sum tempList))/(product(tempList / factorial))
+)*}
 
+--original multinomial coefficient
 multinomial = (myList) -> (
-{*    myList = (toList mySequence);
-    upperPrep = sum myList;
-    upper = factorial upperPrep;
-    lowerPrep = myList / factorial;
-    lower = sum(lowerPrep);
-    upper / lower *}
-     (factorial(sum myList))/(product(myList / factorial))
+    (factorial(sum myList))/(product(myList / factorial))
 )
 
+--compute the monomial corresponding to degrees of the variables
 varsPowers = (myList,myVars) -> (
     holder = 1;
     for i from 0 to (#myList -1) do (
@@ -60,8 +109,6 @@ varsPowers = (myList,myVars) -> (
     holder	
 )            
 
---for debugging which loop is broken
---end
 
 cleverFactor = method(TypicalValue => MutableMatrix)
 cleverFactor(RingElement) := (f) -> (
@@ -104,153 +151,41 @@ cleverFactor(RingElement) := (f) -> (
     for i from 1 to numVars do (
 	listOfPowers = append(listOfPowers, 0);
     );
---a large loop; columnCount tracking will occur within 
---the selection of each listOfPowers, as there is
---a great deal of repitition.
-
---debug zone
---ans = read "debug 1? y or n "; if ans == "y" then print listOfPowers;
-
-    finished = false;
-    while finished == false do (
---we have a reasonable listOfPowers 
---so perform the changes to coefficientMatrix    
---columnCount tracks the index of x_j-y_j    
-        for columnCount from 1 to numVars do (
+--call to listBuilder to created the list of powers
+    listOfLists = listBuilder(degreeList,deg);
+    for listOfPowers in listOfLists do (
+	
+    	for columnCount from 1 to numVars do (
 --for each j, the general algorithm sums over these multisets that contain j.
 --to make the above construction apply independently of j, the multisets above
 --were allowed to have, at most, deg-1 terms, so that one more y_j can now be added.
 --we now check against the degreeList to see if this addition can occur.
 --if not, then this multiset is not included in the sum for that value of j.
-
---degug zone
---ans = read "pre-coefficientMatrix adjust debug? y or n: "; if ans == "y" then print (columnCount, degreeList,listOfPowers);
 	    if (degreeList_(columnCount-1) > listOfPowers_(columnCount-1))
---debug zone
 	    then
---	    ans = read "coefficientMatrix verbose debug? y or n: "; 
---    if ans == "y" then 
              print(columnCount,
 		 listOfPowers,
 		 coefficientMatrix_(0,columnCount-1),
 	     (1/(deg^(sum listOfPowers+1))),
-	     multinomial(listOfPowers),
-	     varsPowers(listOfPowers,YGens),
-	     specialPartial(fy,listOfPowers,YGens,columnCount));
+	     multinomial(listOfPowers)*(listOfPowers_(columnCount-1)+1),
+	     varsPowers(listOfPowers,XGens),
+	     specialPartial(fy,listOfPowers,YGens,columnCount)); 
+	 
     	    coefficientMatrix_(0,columnCount-1) = 
 	    coefficientMatrix_(0,columnCount-1)
 	    + (1/(deg^(sum listOfPowers+1)))
-	    * multinomial(listOfPowers)
-	    * varsPowers(listOfPowers,YGens)
+	    * multinomial(listOfPowers)*(listOfPowers_(columnCount-1)+1)
+	    * varsPowers(listOfPowers,XGens)
 	    * specialPartial(fy,listOfPowers,YGens,columnCount);
-		
---(re)set the need for overflow	    
-	activateOverflow = false;
---check if current total degree forces overflow
---the deg-1 is since we're secretly going to add one factor
---of y_j as j varies, then ignore it for parts of the computation,
---so there needs to be room to make this later addition
-
---debug zone
---ans = read "debug 2? y or n "; if ans == "y" then print (listOfPowers,activateOverflow,finished,(sum(toList listOfPowers) >=  (deg-1)));
-
-	if ((sum listOfPowers) >=  (deg-1))
---queue the overflow; staring with the 2nd entry	    
-	then (
-	    activateOverflow = true; 
-	    overflowColumn = 2;
-	)
-	else (
---check if an addition attempt in the "ones" place forces overflow
-	if (listOfPowers_0 >= degreeList_0)
---queue the overflow; staring with the 1st entry	    	    
-	then (
-	    activateOverflow = true;
-	    overflowColumn = 1;
-	)
-	);
-    
---debug zone
---ans = read "debug 3? y or n "; if ans == "y" then print (listOfPowers,activateOverflow,finished);
- 	
---check if there is space to perform the addition in the "ones" place
-	if activateOverflow = false
---there is space. perform the addition. prepped for coefficientMatrix
-	then (listOfPowers_0 = (listOfPowers_0)+1)
-	else (
---activate overflow protocol:
---begin search for the next column that has space for addition,
---and that there is a column left to consider		
-	overflowLocated = false;
---debug zone	
---ans = read "debug 4? y or n "; if ans == "y" then print (listOfPowers,overflowColumn, overflowLocated, overflowColumn <= (deg-1));	
-	while ((overflowLocated == false) and (overflowColumn <= (deg))) do (
---check if the current column allows for addition		
---debug zone
---ans = read "debug 5? y or n "; if ans4 == "y" then print (listOfPowers,overflowColumn);
-	    if (listOfPowers_overflowColumn < degreeList_overflowColumn)
-	    then (overflowLocated = true)
---if not, move to the next.		
-	    else (overflowColumn = overflowColumn+1)
-	);
---asses the reason that the preceeding search for the overflowColumn was terminated,
---i.e., have we reached the end?	
-	if (overflowColumn <= (deg))
-	then (
---increase by 1 in the overflow column	    
-    	tempList = {};
-	for i from 0 to ((#listOfPowers)-1) do (
-	    if i == overflowColumn then (
-		tempList = append(tempList, (listOfPowers_overflowColumn)+1))
-	    else tempList = append(tempList, listOfPowers_overflowColumn)
-	    );
-	listOfPowers = tempList;
---reset all lower columns to 0	    
-    	tempList = {};
-	for i from 0 to (overflowColumn - 1) do (
-    	    tempList = append(tempList,0)
-	    );
-	for i from overflowColumn to ((#listOfPowers) - 1) do (
-	    tempList = append(tempList, listOfPowers_i)
-	    );
-	)
---there isn't enough space to overflow, so we're done.	
-	else (finished = true );
---debug zone
---ans = read "debug 6? y or n "; if ans == "y" then print (listOfPowers,overflowColumn,finished);	
-	);
-   );
-    );
+	 );
+     );
 matrix coefficientMatrix
 )
         
-{* --this original algorithm won't work; need to account for possible
-   --repotition of the variables of differentiation. Consider
-   --use of lists rather than sets of variables.
---columnCount tracks the index of x_j-y_j    
-    for columnCount from 1 to numVars do (
-	varsIndices = 1..numVars; --a list
-    	varsIndices = toList indexedVars; --now a list
-    	indicesSubset = nontrivialPowerSet(varsIndices); 
-	for subsetCounter from 1 to 2^(numVars-1) do (
-	    varsSubset = indicesSubset_subsetCounter;
-	    if isSubset(set{columnCount},varsSubset) then
-	    for j in varsSubset do (
-		varFactor = 1;
-		for a in varsSubset do (
-		    if a=!=columnCount then varFactor = varFactor*XGens_(a-1)
-		);
-    	    	coefficientMatrix_(0,columnCount) = (1/d^(# varsSubset))*varFactor*specialPartial(fy,yVarsSubset);
-		);
-	);
-    ); *} --end of original
-
-
-
-
 end
 restart
 load "cleverFactor.m2"
+listBuilder({1,1,1},3)
 R = QQ[x_1,x_2,x_3]
 f = x_1+x_2+x_3
 M = cleverFactor(f)
@@ -259,6 +194,7 @@ first(flatten(entries (M*A)))
 
 restart
 load "cleverFactor.m2"
+listBuilder({0,0,2},2)
 R = QQ[x_1,x_2,x_3]
 f = x_3^2
 M = cleverFactor(f)
@@ -272,5 +208,11 @@ M = cleverFactor(x)
 y
 y
 
+restart
+load "cleverFactor.m2"
 R = QQ[x_1,x_2]
 f = x_1^2+x_1*x_2
+listBuilder({2,1},2)
+M = cleverFactor(f)
+A = matrix{{x_1-y_1},{x_2-y_2}}
+first(flatten(entries (M*A)))

@@ -7,7 +7,6 @@ listBuilder(List,ZZ) := (degreeList,deg) -> (
 	);
     	listOfLists = {};
     while finished == false do (
-	print(listOfPowers);
 	if (sum(listOfPowers) < deg)
 	then (
 	    listOfLists = append(listOfLists,listOfPowers)
@@ -18,7 +17,6 @@ listBuilder(List,ZZ) := (degreeList,deg) -> (
 	then (
 	    activateOverflow = true;
 	);
-    	print(activateOverflow);
 	if activateOverflow == false 
 	then (
 	    tempList = {(listOfPowers_0)+1};
@@ -37,7 +35,6 @@ listBuilder(List,ZZ) := (degreeList,deg) -> (
 		    overflowLocated = true)
 		);
 	    );
-	print("hi! ", overflowColumn < #listOfPowers);
 	    if (overflowColumn < #listOfPowers) then (
 		tempList = {};
 		for i from 0 to (overflowColumn-1) do (
@@ -59,3 +56,5 @@ end
 restart
 load "listBuilder.m2"
 listBuilder({3,2,3},10)
+listBuilder({3,2,3},4)
+listBuilder({3,4,2,5},5)
