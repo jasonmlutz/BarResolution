@@ -1,0 +1,4 @@
+listBuilder = method()
+listBuilder(List) := myList -> (
+    true
+    )
