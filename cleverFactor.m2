@@ -76,6 +76,10 @@ factorial = i -> (
     i!
 )
 
+maxOne = i -> (
+    max(i,1)
+)    
+
 --take a given list, increase the entry in spot bonus by one, under
 --the convention that the first element of the list is in position 1
 incrementList = (myList,bonus) -> (
@@ -93,16 +97,17 @@ tempList
 countReps = (myBounds,myList,bonus) -> (
     if #myBounds =!= #myList then error "expected lists of the same length";
     holder = 1;
---    newMyList = incrementList(myList,bonus);
+    newMyList = incrementList(myList,bonus);
 --    newMyBounds = incrementList(myBounds,bonus);
     newMyBounds = myBounds;
-    newMyList = myList;
+--    newMyList = myList;
     for i from 0 to (#myBounds-1) do (
-	holder = holder*binomial(newMyBounds_i,newMyList_i)*(factorial newMyList_i)
+	holder = holder*max(binomial(newMyBounds_i,newMyList_i)*(factorial newMyList_i),1)
     );
 --if (myBounds_(bonus-1)-myList_(bonus-1)-1<0) then error "an entry in argument 2 is too large!";
 --holder*max(myBounds_(bonus-1)-myList_(bonus-1)-1,1)
-holder*max(newMyBounds_(bonus-1)-newMyList_(bonus-1)-1,1)
+holder
+--*max(newMyBounds_(bonus-1)-newMyList_(bonus-1)-1,1)
 )
 
 --compute the monomial corresponding to degrees of the variables
@@ -162,22 +167,24 @@ cleverFactor(RingElement) := (f) -> (
 --if not, then this multiset is not included in the sum for that value of j.
 	    if (degreeList_(columnCount-1) > listOfPowers_(columnCount-1))
 	    then
-             print(columnCount,
+             (print(columnCount,
 		 degreeList,
 		 listOfPowers,
 		-- degreeList_(columnCount-1)-listOfPowers_(columnCount-1)-1,
 		 coefficientMatrix_(0,columnCount-1),
 	     (1/(deg^(sum listOfPowers+1))),
-	     countReps(degreeList,listOfPowers,columnCount),
+	     product(incrementList(listOfPowers,columnCount) / factorial),
+	     --countReps(degreeList,listOfPowers,columnCount),
 	     varsPowers(listOfPowers,XGens),
 	     specialPartial(fy,listOfPowers,YGens,columnCount)); 
 	 
     	    coefficientMatrix_(0,columnCount-1) = 
 	    coefficientMatrix_(0,columnCount-1)
 	    + (1/(deg^(sum listOfPowers+1)))
-	    * countReps(degreeList,listOfPowers,columnCount)
+	    * product(incrementList(listOfPowers,columnCount) / factorial)
+	    -- countReps(degreeList,listOfPowers,columnCount)
 	    * varsPowers(listOfPowers,XGens)
-	    * specialPartial(fy,listOfPowers,YGens,columnCount);
+	    * specialPartial(fy,listOfPowers,YGens,columnCount);)
 	 );
      );
 matrix coefficientMatrix
@@ -196,18 +203,11 @@ first(flatten(entries (M*A)))
 restart
 load "cleverFactor.m2"
 listBuilder({0,0,2},2)
-R = QQ[x_1,x_2,x_3]
+R = QQ[x_1,x_2,x_3,y_1,y_2,y_3]
 f = x_3^2
 M = cleverFactor(f)
 A = matrix{{x_1-y_1},{x_2-y_2},{x_3-y_3}}
 first(flatten(entries (M*A)))
-
-restart
-load "cleverFactor.m2"
-R = QQ[x]
-M = cleverFactor(x)
-y
-y
 
 restart
 load "cleverFactor.m2"
@@ -217,3 +217,17 @@ listBuilder({2,1},2)
 M = cleverFactor(f)
 A = matrix{{x_1-y_1},{x_2-y_2}}
 first(flatten(entries (M*A)))
+
+restart
+R = QQ[x_1,x_2,y_1,y_2]
+f0 = x_1^2+x_1*x_2
+g1 = x_1-y_1
+g2 = x_2-y_2
+h1 = (f0-(f0%g1))/(g1)
+denominator h1
+h1 = numerator h1
+f1 = f0%g1
+h2 = (f1-(f1%g2))/(g2)
+h2 = numerator h2
+
+g1*h1+g2*h2
