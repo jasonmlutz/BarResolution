@@ -19,13 +19,7 @@ listBuilder(List,ZZ) := (degreeList,deg) -> (
 	    activateOverflow = true;
 	);
 	if activateOverflow == false 
-	then (
-	    tempList = {(listOfPowers_0)+1};
-	    for i from 1 to (#listOfPowers-1) do (
-		tempList = append(tempList, listOfPowers_i)
-		);
-	    listOfPowers = tempList;
-	    )
+	then (listOfPowers = incrementList(listOfPowers,1))
 	else (
 	    overflowLocated = false;
 	    while overflowLocated == false do (
@@ -82,6 +76,8 @@ factorial = i -> (
     i!
 )
 
+--take a given list, increase the entry in spot bonus by one, under
+--the convention that the first element of the list is in position 1
 incrementList = (myList,bonus) -> (
     tempList = {};
     for i from 0 to (bonus-2) do (
@@ -92,6 +88,21 @@ incrementList = (myList,bonus) -> (
 	tempList = append(tempList, myList_i)
     );        
 tempList
+)
+
+countReps = (myBounds,myList,bonus) -> (
+    if #myBounds =!= #myList then error "expected lists of the same length";
+    holder = 1;
+--    newMyList = incrementList(myList,bonus);
+--    newMyBounds = incrementList(myBounds,bonus);
+    newMyBounds = myBounds;
+    newMyList = myList;
+    for i from 0 to (#myBounds-1) do (
+	holder = holder*binomial(newMyBounds_i,newMyList_i)*(factorial newMyList_i)
+    );
+--if (myBounds_(bonus-1)-myList_(bonus-1)-1<0) then error "an entry in argument 2 is too large!";
+--holder*max(myBounds_(bonus-1)-myList_(bonus-1)-1,1)
+holder*max(newMyBounds_(bonus-1)-newMyList_(bonus-1)-1,1)
 )
 
 --compute the monomial corresponding to degrees of the variables
@@ -140,15 +151,9 @@ cleverFactor(RingElement) := (f) -> (
     deg := first (degree f);
 --the placeholder for the coefficients of each (x_j-y_j)    
     coefficientMatrix = mutableMatrix(myNewRing, 1, numVars);
---create and populate a list to track the exponents
-    listOfPowers = {};
-    for i from 1 to numVars do (
-	listOfPowers = append(listOfPowers, 0);
-    );
 --call to listBuilder to created the list of powers
     listOfLists = listBuilder(degreeList,deg);
-    for listOfPowers in listOfLists do (
-	
+    for listOfPowers in listOfLists do (	
     	for columnCount from 1 to numVars do (
 --for each j, the general algorithm sums over these multisets that contain j.
 --to make the above construction apply independently of j, the multisets above
@@ -158,17 +163,19 @@ cleverFactor(RingElement) := (f) -> (
 	    if (degreeList_(columnCount-1) > listOfPowers_(columnCount-1))
 	    then
              print(columnCount,
+		 degreeList,
 		 listOfPowers,
+		-- degreeList_(columnCount-1)-listOfPowers_(columnCount-1)-1,
 		 coefficientMatrix_(0,columnCount-1),
 	     (1/(deg^(sum listOfPowers+1))),
-	     multinomial(listOfPowers)*(listOfPowers_(columnCount-1)+1),
+	     countReps(degreeList,listOfPowers,columnCount),
 	     varsPowers(listOfPowers,XGens),
 	     specialPartial(fy,listOfPowers,YGens,columnCount)); 
 	 
     	    coefficientMatrix_(0,columnCount-1) = 
 	    coefficientMatrix_(0,columnCount-1)
 	    + (1/(deg^(sum listOfPowers+1)))
-	    * multinomial(listOfPowers)*(listOfPowers_(columnCount-1)+1)
+	    * countReps(degreeList,listOfPowers,columnCount)
 	    * varsPowers(listOfPowers,XGens)
 	    * specialPartial(fy,listOfPowers,YGens,columnCount);
 	 );
