@@ -1,0 +1,15 @@
+
+
+
+end
+restart
+R = QQ[x_1,x_2,y_1,y_2]
+f0 = x_1^2+x_1*x_2
+g1 = x_1-y_1
+g2 = x_2-y_2
+h1 = (f0-(f0%g1))/(g1)
+denominator h1
+h1 = numerator h1
+f1 = f0%g1
+h2 = (f1-(f1%g2))/(g2)
+h2 = numerator h2
