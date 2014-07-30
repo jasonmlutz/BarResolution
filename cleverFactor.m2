@@ -80,10 +80,9 @@ buildDegreeList = (myPolynomial) -> (
 
 factorial = i -> (
     i!
-)    
+)
 
---compute the multinomial coefficient, modified for bonus
-{*multinomial = (myList,bonus) -> (
+incrementList = (myList,bonus) -> (
     tempList = {};
     for i from 0 to (bonus-2) do (
 	tempList = append(tempList,myList_i)
@@ -91,13 +90,8 @@ factorial = i -> (
     tempList = append(tempList, (myList_(bonus-1)+1));
     for i from (bonus) to (#myList-1) do (
 	tempList = append(tempList, myList_i)
-    );    
-     (factorial(sum tempList))/(product(tempList / factorial))
-)*}
-
---original multinomial coefficient
-multinomial = (myList) -> (
-    (factorial(sum myList))/(product(myList / factorial))
+    );        
+tempList
 )
 
 --compute the monomial corresponding to degrees of the variables
