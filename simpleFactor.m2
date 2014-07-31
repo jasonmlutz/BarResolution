@@ -36,15 +36,15 @@ simpleFactor(RingElement) := (f) -> (
     for i from 0 to (numVars-1) do (
 	differenceMatrix_(0,i) = XGens_i-YGens_i);
     differenceMatrix = matrix differenceMatrix;
-    counter = 0;
-    polyRemainder = fx-fy;
-    while polyRemainder =!= 0 do (
-	
-    coefficientMatrix_(0,0) = numerator((fx-fy-(fx-fy)%differenceMatrix_(0,0))/(differenceMatrix_(0,0)));
-    
-    
-
-coefficientMatrix
+    remainderList = {(fx-fy)%differenceMatrix_(0,0)};
+    for i from 1 to (numVars-1) do (
+	remainderList = append(remainderList, (remainderList_(i-1))%differenceMatrix_(0,i))
+	);
+    coefficientMatrix_(0,0) = numerator((fx-fy-(fx-fy)%differenceMatrix_(0,0))/(differenceMatrix_(0,0)));    
+    for i from 1 to (numVars-1) do (
+	coefficientMatrix_(0,i) = numerator((remainderList_(i-1)-remainderList_i)/(coefficientMatrix_(0,i)))
+    );
+(matrix coefficientMatrix, differenceMatrix)
 )
 
 end
