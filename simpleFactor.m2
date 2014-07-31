@@ -10,8 +10,6 @@ simpleFactor(RingElement) := (f) -> (
     then error "expected a polynomial ring over a field";
     if (char R) =!= 0
     then error "expected a characteristic 0 base field";
---the list consisting of the (highest) degrees of each variable
-    degreeList = buildDegreeList(f);    
 --creating the new variables for the ring representing the enveloping algebra R**R
     numVars := length gens myRing;
     newGens = gens myRing;
@@ -31,13 +29,31 @@ simpleFactor(RingElement) := (f) -> (
     injY := map(myNewRing, myRing, matrix{YGens});
     fx := injX(f);
     fy := injY(f);
+--the placeholder for the coefficients of each (x_j-y_j)    
+    coefficientMatrix = mutableMatrix(myNewRing, 1, numVars);
+--make the matrix of differences x_i-y_i
+    differenceMatrix = mutableMatrix(myNewRing,1,numVars);
+    for i from 0 to (numVars-1) do (
+	differenceMatrix_(0,i) = XGens_i-YGens_i);
+    differenceMatrix = matrix differenceMatrix;
+    counter = 0;
+    polyRemainder = fx-fy;
+    while polyRemainder =!= 0 do (
+	
+    coefficientMatrix_(0,0) = numerator((fx-fy-(fx-fy)%differenceMatrix_(0,0))/(differenceMatrix_(0,0)));
     
     
 
-
+coefficientMatrix
+)
 
 end
 restart
+load "simpleFactor.m2"
+R = QQ[x_1,x_2]
+f = x_1^2+x_1*x_2
+simpleFactor(f)
+
 R = QQ[x_1,x_2,y_1,y_2]
 f0 = x_1^2+x_1*x_2
 g1 = x_1-y_1
