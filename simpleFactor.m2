@@ -1,5 +1,6 @@
-simpleFactor = method(TypicalValue => MutableMatrix)
-simpleFactor(RingElement) := (f) -> (
+simpleFactor = method(TypicalValue => Matrix, Options => {SanityCheck => true})
+simpleFactor(RingElement) := opts -> (f) -> (
+    run "date";
 --name relevant objects    
     myRing = ring f;
 --create output for predictable errors of input    
@@ -36,16 +37,13 @@ simpleFactor(RingElement) := (f) -> (
     for i from 0 to (numVars-1) do (
 	differenceMatrix_(i,0) = XGens_i-YGens_i);
     differenceMatrix = matrix differenceMatrix;
-{*    remainderList = {(fx-fy)%differenceMatrix_(0,0)};
-    for i from 1 to (numVars-1) do (
-	remainderList = append(remainderList, (remainderList_(i-1))%differenceMatrix_(i,0))
+    output = (fx-fy)//gens (ideal differenceMatrix);    
+    if opts.SanityCheck==true then (
+	checkValue = ((flatten entries ((transpose output)*differenceMatrix))_0 == (fx-fy)); 
+	<< "Sanity Check success = " << checkValue << endl;
 	);
-    coefficientMatrix_(0,0) = numerator((fx-fy-(fx-fy)%differenceMatrix_(0,0))/(differenceMatrix_(0,0)));    
-    for i from 1 to (numVars-1) do (
-	coefficientMatrix_(0,i) = numerator((remainderList_(i-1)-remainderList_i)/(differenceMatrix_(i,0)))
-    );
-(matrix coefficientMatrix, differenceMatrix) *}
-(fx-fy)//gens (ideal differenceMatrix)
+    run "date";
+output
 )
 
 end
@@ -54,8 +52,6 @@ load "simpleFactor.m2"
 R = QQ[x_1,x_2]
 f = x_1^2+x_1*x_2
 A = simpleFactor(f)
-(flatten entries ((transpose A)*differenceMatrix))_0==(fx-fy)
-
 
 restart
 load "simpleFactor.m2"
@@ -63,14 +59,9 @@ R = QQ[x_1..x_3]
 f = x_3^2
 A = simpleFactor(f)
 
-
-
 restart
 load "simpleFactor.m2"
-R = QQ[x_1..x_10]
-f = random(5,R)
-A = simpleFactor(f)
-(flatten entries ((transpose A)*differenceMatrix))_0==(fx-fy)
+R = QQ[x_1..x_10]; run "date ", f = random(7,R); A = simpleFactor(f);
 
 
 R = QQ[x_1,x_2,y_1,y_2]
