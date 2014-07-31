@@ -32,17 +32,17 @@ simpleFactor(RingElement) := (f) -> (
 --the placeholder for the coefficients of each (x_j-y_j)    
     coefficientMatrix = mutableMatrix(myNewRing, 1, numVars);
 --make the matrix of differences x_i-y_i
-    differenceMatrix = mutableMatrix(myNewRing,1,numVars);
+    differenceMatrix = mutableMatrix(myNewRing,numVars,1);
     for i from 0 to (numVars-1) do (
-	differenceMatrix_(0,i) = XGens_i-YGens_i);
+	differenceMatrix_(i,0) = XGens_i-YGens_i);
     differenceMatrix = matrix differenceMatrix;
     remainderList = {(fx-fy)%differenceMatrix_(0,0)};
     for i from 1 to (numVars-1) do (
-	remainderList = append(remainderList, (remainderList_(i-1))%differenceMatrix_(0,i))
+	remainderList = append(remainderList, (remainderList_(i-1))%differenceMatrix_(i,0))
 	);
     coefficientMatrix_(0,0) = numerator((fx-fy-(fx-fy)%differenceMatrix_(0,0))/(differenceMatrix_(0,0)));    
     for i from 1 to (numVars-1) do (
-	coefficientMatrix_(0,i) = numerator((remainderList_(i-1)-remainderList_i)/(coefficientMatrix_(0,i)))
+	coefficientMatrix_(0,i) = numerator((remainderList_(i-1)-remainderList_i)/(differenceMatrix_(i,0)))
     );
 (matrix coefficientMatrix, differenceMatrix)
 )
@@ -52,7 +52,9 @@ restart
 load "simpleFactor.m2"
 R = QQ[x_1,x_2]
 f = x_1^2+x_1*x_2
-simpleFactor(f)
+A = simpleFactor(f)
+flatten entries ((A_0)*(A_1))
+f
 
 R = QQ[x_1,x_2,y_1,y_2]
 f0 = x_1^2+x_1*x_2
