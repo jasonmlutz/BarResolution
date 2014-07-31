@@ -36,7 +36,7 @@ simpleFactor(RingElement) := (f) -> (
     for i from 0 to (numVars-1) do (
 	differenceMatrix_(i,0) = XGens_i-YGens_i);
     differenceMatrix = matrix differenceMatrix;
-    remainderList = {(fx-fy)%differenceMatrix_(0,0)};
+{*    remainderList = {(fx-fy)%differenceMatrix_(0,0)};
     for i from 1 to (numVars-1) do (
 	remainderList = append(remainderList, (remainderList_(i-1))%differenceMatrix_(i,0))
 	);
@@ -44,7 +44,8 @@ simpleFactor(RingElement) := (f) -> (
     for i from 1 to (numVars-1) do (
 	coefficientMatrix_(0,i) = numerator((remainderList_(i-1)-remainderList_i)/(differenceMatrix_(i,0)))
     );
-(matrix coefficientMatrix, differenceMatrix)
+(matrix coefficientMatrix, differenceMatrix) *}
+(fx-fy)//gens (ideal differenceMatrix)
 )
 
 end
@@ -53,22 +54,23 @@ load "simpleFactor.m2"
 R = QQ[x_1,x_2]
 f = x_1^2+x_1*x_2
 A = simpleFactor(f)
-flatten entries ((A_0)*(A_1))
-f
+(flatten entries ((transpose A)*differenceMatrix))_0==(fx-fy)
+
 
 restart
 load "simpleFactor.m2"
 R = QQ[x_1..x_3]
 f = x_3^2
 A = simpleFactor(f)
-(flatten entries ((A_0)*(A_1)))_0 == (fx-fy)
+
+
 
 restart
 load "simpleFactor.m2"
-R = QQ[x_1..x_4]
-f = (1/2)*x_1^2
+R = QQ[x_1..x_10]
+f = random(5,R)
 A = simpleFactor(f)
-(flatten entries ((A_0)*(A_1)))_0 == (fx-fy)
+(flatten entries ((transpose A)*differenceMatrix))_0==(fx-fy)
 
 
 R = QQ[x_1,x_2,y_1,y_2]
