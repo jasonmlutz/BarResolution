@@ -1,6 +1,6 @@
-simpleFactor = method(TypicalValue => Matrix, Options => {SanityCheck => true})
+simpleFactor = method(TypicalValue => Matrix, Options => {SanityCheck => true, PrintTime => false})
 simpleFactor(RingElement) := opts -> (f) -> (
-    run "date";
+    if opts.PrintTime == true then run "date";
 --name relevant objects    
     myRing = ring f;
 --create output for predictable errors of input    
@@ -42,7 +42,7 @@ simpleFactor(RingElement) := opts -> (f) -> (
 	checkValue = ((flatten entries ((transpose output)*differenceMatrix))_0 == (fx-fy)); 
 	<< "Sanity Check success = " << checkValue << endl;
 	);
-    run "date";
+    if opts.PrintTime == true then run "date";    
 output
 )
 
@@ -61,7 +61,7 @@ A = simpleFactor(f)
 
 restart
 load "simpleFactor.m2"
-R = QQ[x_1..x_4]; run "date ", f = random(10,R); A = simpleFactor(f);
+R = QQ[x_1..x_7]; run "date ", f = random(8,R); A = simpleFactor(f, PrintTime => true);
 
 
 R = QQ[x_1,x_2,y_1,y_2]
