@@ -61,7 +61,7 @@ A = simpleFactor(f)
 
 restart
 load "simpleFactor.m2"
-R = QQ[x_1..x_7]; run "date ", f = random(8,R); A = simpleFactor(f, PrintTime => true);
+R = QQ[x_1..x_10]; run "date ", f = random(6,R); A = simpleFactor(f, PrintTime => true);
 
 
 R = QQ[x_1,x_2,y_1,y_2]
