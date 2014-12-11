@@ -1,0 +1,3 @@
+--trying to build a Tate resolution
+--input ring and defining ideal, integer index
+--output a row of the complex

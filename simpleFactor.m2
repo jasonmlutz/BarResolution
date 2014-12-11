@@ -51,7 +51,7 @@ restart
 load "simpleFactor.m2"
 R = QQ[x_1,x_2]
 f = x_1^2+x_1*x_2
-A = simpleFactor(f)
+A = simpleFactor(f, PrintTime => true)
 
 restart
 load "simpleFactor.m2"
